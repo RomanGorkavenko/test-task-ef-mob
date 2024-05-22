@@ -1,6 +1,5 @@
 package ru.effectivemobile.testtask.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -29,11 +28,9 @@ public class Client {
 
     private String username;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "client")
-    private Set<Email> emailId;
+    private Set<Email> emails;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "client")
     private Set<PhoneNumber> phoneNumbers;
 

@@ -1,5 +1,6 @@
 package ru.effectivemobile.testtask.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,10 +19,11 @@ public class PhoneNumber {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long number;
+    private String number;
     private String description;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "client_id", referencedColumnName = "id")
     private Client client;
 

@@ -1,12 +1,13 @@
 package ru.effectivemobile.testtask.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -19,10 +20,11 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long number;
+    private UUID number;
     private Long balance;
 
     @OneToOne(mappedBy = "account")
+    @JsonIgnore
     private Client client;
 
     @Override
