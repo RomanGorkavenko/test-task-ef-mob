@@ -5,6 +5,9 @@ import lombok.Data;
 
 import ru.effectivemobile.testtask.web.dto.validation.ValidPassword;
 
+/**
+ * Запрос при создании клиента.
+ */
 @Data
 public class ClientRequest {
 

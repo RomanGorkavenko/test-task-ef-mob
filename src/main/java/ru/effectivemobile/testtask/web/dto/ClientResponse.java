@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * Ответ при возвращении клиента.
+ */
 @Data
 public class ClientResponse {
 

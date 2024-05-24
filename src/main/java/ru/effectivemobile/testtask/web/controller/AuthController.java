@@ -27,11 +27,12 @@ public interface AuthController {
     })
     JwtResponse login(JwtRequest loginRequest);
 
-    @Operation(summary = "Регистрация", description = "Регистрация пользователя. Только для администратора")
+    @Operation(summary = "Регистрация", description = "Регистрация пользователя.")
     ResponseEntity<ClientResponse> register(ClientRequest clientRequest) throws InterruptedException;
 
     @Operation(summary = "Обновление access token",
-            description = "Обновляет access token. Token вставляется без кавычек. Только для администратора")
+            description = "Обновляет access token. Token вставляется без кавычек." +
+                    "Только для аутентифицированного пользователя.")
     JwtResponse refresh(String refreshToken);
 
 }

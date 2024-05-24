@@ -3,15 +3,17 @@ package ru.effectivemobile.testtask.service;
 import com.github.javafaker.Faker;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.event.Level;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.effectivemobile.testtask.aspect.Loggable;
 import ru.effectivemobile.testtask.exception.BalancePositiveException;
 import ru.effectivemobile.testtask.exception.CustomAccessDeniedException;
-import ru.effectivemobile.testtask.exception.NumberOfPhoneNumbersException;
+import ru.effectivemobile.testtask.exception.NumberOfPhoneNumbersOrEmailException;
 import ru.effectivemobile.testtask.model.Account;
 import ru.effectivemobile.testtask.model.Client;
 import ru.effectivemobile.testtask.model.Email;
@@ -38,9 +40,16 @@ public class ClientService {
 
     private final ReentrantLock lock = new ReentrantLock();
 
+    /**
+     * Создание клиента.
+     * Использую библиотеку JavaFaker для генерации данных, так как при создании клиента пользователь их не вводит,
+     * но они должны быть заполнены.
+     * @param clientRequest запрос для создания клиента по условиям в ТЗ.
+     * @return клиента.
+     */
+    @Loggable(level = Level.WARN)
     @Transactional(rollbackOn = Exception.class)
     public Client create(ClientRequest clientRequest) {
-
         Faker faker = new Faker(new Locale("ru-RU"));
 
         Double balance = ChangeBalance.round(clientRequest.getBalance());
@@ -62,9 +71,13 @@ public class ClientService {
         return clientResult;
     }
 
+    /**
+     * Поиск по параметрам с пагинацией и сортировкой.
+     * @return результат по странично.
+     */
+    @Loggable(level = Level.INFO)
     public Page<Client> findByParams(Date birthdate, String fullName,
                                      String phoneNumber, String email, PageRequest paging) {
-
         PhoneNumber phoneNumberSearch = null;
         Email emailSearch = null;
 
@@ -80,21 +93,30 @@ public class ClientService {
 
     }
 
+    /**
+     * Функционал перевода денег с одного счета на другой.
+     * Со счета аутентифицированного пользователя, насчёт другого пользователя.
+     * Добавлена проверка на отрицательный баланс.
+     * Работа с базой потока безопасна.
+     * @param searchClientForMoneyTransfer параметры поиска клиента для перевода.
+     * @return остаток на балансе клиента после перевода денег.
+     */
+    @Loggable(level = Level.WARN)
     @Transactional
     public Double moneyTransfer(SearchClientForMoneyTransfer searchClientForMoneyTransfer) {
-
         String username = searchClientForMoneyTransfer.getUsername() != null
                 ? searchClientForMoneyTransfer.getUsername() : null;
 
-        Long money = ChangeBalance.toLong(ChangeBalance.round(searchClientForMoneyTransfer.getAmount()));
+        Long amount = ChangeBalance
+                .toLong(ChangeBalance.round(searchClientForMoneyTransfer.getAmount()));
 
         Client client = clientRepository.findById(getUserId())
                 .orElseThrow(() -> new NoSuchElementException("Пользователь не найден"));
 
         Long clientBalance = client.getAccount().getBalance();
 
-        if(clientBalance >= money) {
-            clientBalance -= money;
+        if(clientBalance >= amount) {
+            clientBalance -= amount;
         } else {
             throw new BalancePositiveException("Ваш баланс не может быть отрицательным");
         }
@@ -103,18 +125,20 @@ public class ClientService {
         Email emailSearch = null;
 
         if (searchClientForMoneyTransfer.getPhoneNumber() != null) {
-            phoneNumberSearch = phoneNumberService.findByNumber(searchClientForMoneyTransfer.getPhoneNumber());
+            phoneNumberSearch = phoneNumberService
+                    .findByNumber(searchClientForMoneyTransfer.getPhoneNumber());
         }
 
         if (searchClientForMoneyTransfer.getEmail() != null) {
             emailSearch = emailService.findByEmail(searchClientForMoneyTransfer.getEmail());
         }
 
-        Client clientSearch = clientRepository.findByParamsForMoneyTransfer(username, phoneNumberSearch, emailSearch);
+        Client clientSearch = clientRepository
+                .findByParamsForMoneyTransfer(username, phoneNumberSearch, emailSearch);
 
         Long clientSearchBalance = clientSearch.getAccount().getBalance();
 
-        clientSearchBalance += money;
+        clientSearchBalance += amount;
 
         lock.lock();
         try {
@@ -130,38 +154,44 @@ public class ClientService {
         return ChangeBalance.toDouble(clientBalance);
     }
 
-    public Double getAccount() {
+    @Loggable(level = Level.INFO)
+    public Double getBalance() {
         Client client = clientRepository.findById(getUserId())
                 .orElseThrow(() -> new NoSuchElementException("Пользователь не найден"));
         return ChangeBalance.toDouble(client.getAccount().getBalance());
     }
 
+    @Loggable(level = Level.INFO)
     public Client findByUsername(String username) {
         return clientRepository.findByUsername(username)
-                .orElseThrow(() -> new NoSuchElementException("Пользователь с username = " + username + " не найден"));
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Пользователь с username = " + username + " не найден"
+                ));
     }
 
+    @Loggable(level = Level.INFO)
     public PhoneNumber updatePhoneNumber(PhoneNumberUpdate phoneNumberUpdate) {
         return phoneNumberService.update(phoneNumberUpdate.getOldPhoneNumber(),
                                 phoneNumberUpdate.getNewPhoneNumber(),
                                 getUserId());
     }
 
+    @Loggable(level = Level.INFO)
     public void deletePhoneNumber(String phoneNumber) {
-
         Client client = clientRepository.findById(getUserId())
                 .orElseThrow(() -> new NoSuchElementException("Пользователь не найден."));
         if (client.getPhoneNumbers().size() == 1) {
-            throw new NumberOfPhoneNumbersException("У пользователя должен быть номер телефона.");
+            throw new NumberOfPhoneNumbersOrEmailException("У пользователя должен быть номер телефона.");
         }
 
         phoneNumberService.delete(phoneNumber, getUserId());
     }
 
+    @Loggable(level = Level.INFO)
     public PhoneNumber addPhoneNumber(String phoneNumber) {
-
         Optional<Client> client = clientRepository.findById(getUserId());
-        PhoneNumber phoneNumberCreate = null;
+
+        PhoneNumber phoneNumberCreate;
 
         if (client.isPresent()) {
            phoneNumberCreate = phoneNumberService.create(phoneNumber, client.get());
@@ -172,29 +202,32 @@ public class ClientService {
         return phoneNumberCreate;
     }
 
+    @Loggable(level = Level.INFO)
     public Email updateEmail(EmailUpdate emailUpdate) {
         return emailService.update(emailUpdate.getOldEmail(),
                 emailUpdate.getNewEmail(),
                 getUserId());
     }
 
+    @Loggable(level = Level.INFO)
     public void deleteEmail(String email) {
-
         Client client = clientRepository.findById(getUserId())
                 .orElseThrow(() -> new NoSuchElementException("Пользователь не найден."));
 
         if (client.getPhoneNumbers().size() == 1) {
-            throw new NumberOfPhoneNumbersException("У пользователя должен быть номер телефона.");
+            throw new NumberOfPhoneNumbersOrEmailException(
+                    "У пользователя должен быть адрес электронной почты."
+            );
         }
 
         emailService.delete(email, getUserId());
     }
 
+    @Loggable(level = Level.INFO)
     public Email addEmail(String email) {
-
         Optional<Client> client = clientRepository.findById(getUserId());
 
-        Email emailCreate = null;
+        Email emailCreate;
 
         if (client.isPresent()) {
             emailCreate = emailService.create(email, client.get());
@@ -209,6 +242,7 @@ public class ClientService {
      * Получение ID пользователя. Из авторизации.
      * @return ID пользователя.
      */
+    @Loggable(level = Level.WARN)
     private Long getUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtEntity client = (JwtEntity) authentication.getPrincipal();

@@ -1,5 +1,12 @@
 package ru.effectivemobile.testtask.web.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,12 +42,14 @@ public class ClientController {
     private final EmailMapper emailMapper;
 
     @GetMapping("/balance")
+    @Operation(summary = "Проверить баланс.", description = "Возвращает баланс аутентифицированного пользователя")
     public ResponseEntity<Double> getBalance() {
-        return ResponseEntity.ok(clientService.getAccount());
+        return ResponseEntity.ok(clientService.getBalance());
     }
 
     @Loggable(level = Level.WARN)
     @PostMapping("/find-by-prams")
+    @Operation(summary = "Поиск по параметрам.", description = "Возвращает Клиента.")
     public ResponseEntity<Page<ClientResponse>> findByParams(@RequestBody
                                                             @Valid ClientSearchValues clientSearchValues) {
         // исключить NullPointerException
@@ -72,40 +81,69 @@ public class ClientController {
     }
 
     @PostMapping("/money-transfer")
+    @Operation(summary = "Перевод денег.", description = "Со счета аутентифицированного клиента," +
+            "на счёт другого клиента.")
     public ResponseEntity<Double> moneyTransfer(@RequestBody @Valid SearchClientForMoneyTransfer moneyTransfer) {
         return ResponseEntity.ok(clientService.moneyTransfer(moneyTransfer));
     }
 
     @PutMapping("/update/phone-number")
+    @Operation(summary = "Обновить номер телефона.", description = "Обновляет номер телефона.")
     public ResponseEntity<PhoneNumberResponse> updatePhoneNumber(@RequestBody
                                                                      @Valid PhoneNumberUpdate phoneNumberUpdate) {
         return ResponseEntity.ok(phoneNumberMapper.toDto(clientService.updatePhoneNumber(phoneNumberUpdate)));
     }
 
     @DeleteMapping("/delete/phone-number")
-    public ResponseEntity<String> deletePhoneNumber(@RequestParam(name = "phoneNumber") String phoneNumber) {
+    @Operation(summary = "Удалить номер телефона.", description = "Удаляет номер телефона.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Номер телефона удален", content = {
+                    @Content(mediaType = "application/json",
+                            schema = @Schema(example = "Номер телефона удален"))
+            }),
+            @ApiResponse(responseCode = "404", description = "Не найден пользователь.", content = {
+                    @Content(mediaType = "text/plain",
+                            schema = @Schema(example = "Пользователь не найден"))
+            }),
+            @ApiResponse(responseCode = "409", description = "Попытка удалить последний номер.", content = {
+                    @Content(mediaType = "text/plain",
+                            schema = @Schema(example = "У пользователя должен быть номер телефона."))
+            })
+    })
+    public ResponseEntity<String> deletePhoneNumber(@RequestParam(name = "phoneNumber")
+                                                @Parameter(name = "phoneNumber", description = "Номер телефона клиента",
+                                                examples =
+                                                {@ExampleObject(name = "Рабочий", value = "+7(999) 022 32 20",
+                                                description = "Удалить номер \"+7(999) 022 32 20\""),
+                                                @ExampleObject(name = "Домашний", value = "246 56 00",
+                                                description = "Удалить номер \"246 56 00\"")})
+                                                String phoneNumber) {
         clientService.deletePhoneNumber(phoneNumber);
         return new ResponseEntity<>("Номер телефона удален", HttpStatus.OK);
     }
 
     @PostMapping("/add/phone-number")
+    @Operation(summary = "Добавить номер телефона.", description = "Добавляет номер телефона.")
     public ResponseEntity<PhoneNumberResponse> addPhoneNumber(@RequestParam("phoneNumber") String phoneNumber) {
         return ResponseEntity.ok(phoneNumberMapper.toDto(clientService.addPhoneNumber(phoneNumber)));
     }
 
     @PutMapping("/update/email")
+    @Operation(summary = "Обновить email.", description = "Обновляет email.")
     public ResponseEntity<EmailResponse> updateEmail(@RequestBody
                                                                  @Valid EmailUpdate emailUpdate) {
         return ResponseEntity.ok(emailMapper.toDto(clientService.updateEmail(emailUpdate)));
     }
 
     @DeleteMapping("/delete/email")
+    @Operation(summary = "Удалить email.", description = "Удаляет email.")
     public ResponseEntity<String> deleteEmail(@RequestParam(name = "email") String email) {
         clientService.deleteEmail(email);
         return new ResponseEntity<>("Номер телефона удален", HttpStatus.OK);
     }
 
     @PostMapping("/add/email")
+    @Operation(summary = "Добавить email.", description = "Добавляет email.")
     public ResponseEntity<EmailResponse> addEmail(@RequestParam("email") String email) {
         return ResponseEntity.ok(emailMapper.toDto(clientService.addEmail(email)));
     }

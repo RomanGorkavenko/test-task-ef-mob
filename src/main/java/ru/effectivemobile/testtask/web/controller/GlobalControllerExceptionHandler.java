@@ -1,9 +1,7 @@
 package ru.effectivemobile.testtask.web.controller;
 
 import jakarta.validation.ConstraintViolationException;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
-import lombok.extern.slf4j.XSlf4j;
 import org.slf4j.event.Level;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import ru.effectivemobile.testtask.exception.BalancePositiveException;
 import ru.effectivemobile.testtask.exception.CustomAccessDeniedException;
-import ru.effectivemobile.testtask.exception.NumberOfPhoneNumbersException;
+import ru.effectivemobile.testtask.exception.NumberOfPhoneNumbersOrEmailException;
 import ru.effectivemobile.testtask.web.dto.validation.ValidationErrorResponse;
 import ru.effectivemobile.testtask.web.dto.validation.Violation;
 
@@ -52,8 +50,14 @@ public class GlobalControllerExceptionHandler {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(NumberOfPhoneNumbersException.class)
-    public ResponseEntity<String> NumberOfPhoneNumbersException(NumberOfPhoneNumbersException e) {
+    @ExceptionHandler(CustomAccessDeniedException.class)
+    public ResponseEntity<String> CustomAccessDeniedException(CustomAccessDeniedException e) {
+        log.atLevel(Level.WARN).log(e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(NumberOfPhoneNumbersOrEmailException.class)
+    public ResponseEntity<String> NumberOfPhoneNumbersException(NumberOfPhoneNumbersOrEmailException e) {
         log.atLevel(Level.WARN).log(e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }

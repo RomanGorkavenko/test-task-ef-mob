@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import ru.effectivemobile.testtask.exception.CustomAccessDeniedException;
 import ru.effectivemobile.testtask.model.Client;
 import ru.effectivemobile.testtask.service.ClientService;
-import ru.effectivemobile.testtask.service.props.UserServiceJwtProperties;
+import ru.effectivemobile.testtask.service.props.JwtProperties;
 import ru.effectivemobile.testtask.web.dto.JwtResponse;
 
 
@@ -30,7 +30,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    private final UserServiceJwtProperties jwtProperties;
+    private final JwtProperties jwtProperties;
 
     private final UserDetailsService userDetailsService;
     private final ClientService clientService;
