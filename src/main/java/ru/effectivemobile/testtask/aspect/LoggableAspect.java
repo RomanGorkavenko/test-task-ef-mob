@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
+/**
+ * Класс выводит информацию о методе, там где стоит аннотация {@link Loggable}.
+ */
 @Slf4j
 @Aspect
 @Component

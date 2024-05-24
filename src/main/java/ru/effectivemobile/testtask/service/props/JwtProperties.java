@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Data
 @ConfigurationProperties("security.jwt")
-public class UserServiceJwtProperties {
+public class JwtProperties {
 
     /**
      * Секретный ключ.

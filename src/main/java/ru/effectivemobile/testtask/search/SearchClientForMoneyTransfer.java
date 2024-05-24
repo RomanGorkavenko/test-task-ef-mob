@@ -1,6 +1,7 @@
 package ru.effectivemobile.testtask.search;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
@@ -10,6 +11,7 @@ import lombok.Data;
 @Data
 public class SearchClientForMoneyTransfer {
 
+    @NotNull
     @PositiveOrZero(message = "Сумма не должен быть отрицательным")
     private Double amount;
 

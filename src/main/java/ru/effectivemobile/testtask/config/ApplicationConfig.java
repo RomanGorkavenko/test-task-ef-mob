@@ -34,16 +34,30 @@ public class ApplicationConfig {
 
     private final JwtTokenProvider tokenProvider;
 
+    /**
+     * Кодировка пароля.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Менеджер аутентификации.
+     * @param configuration Конфигурация аутентификации.
+     * @return {@link AuthenticationManager} менеджер аутентификации.
+     * @throws Exception пробрасывается в случае ошибки.
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
+    /**
+     * Конфигурация OpenApi.
+     * Добавляем кнопку авторизации в OpenApi.
+     * @return {@link OpenAPI} конфигурация OpenApi.
+     */
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
@@ -68,6 +82,12 @@ public class ApplicationConfig {
                 );
     }
 
+    /**
+     * Конфигурация Spring Security.
+     * @param httpSecurity {@link HttpSecurity} конфигурация Spring Security.
+     * @return {@link SecurityFilterChain} конфигурация Spring Security FilterChain.
+     * @throws Exception пробрасывается в случае ошибки.
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
@@ -95,7 +115,6 @@ public class ApplicationConfig {
                 .addFilterBefore(new JwtTokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
-
     }
 
 }
