@@ -23,11 +23,8 @@ public class AccountService {
     }
 
     public void changeBalance(Client client) {
-
         Double balance = ChangeBalance.toDouble(client.getAccount().getBalance());
-
         Account account = client.getAccount();
-
         ChangeBalance.percentageIncrease(balance, account, accountRepository);
     }
 

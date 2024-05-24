@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
 
@@ -36,10 +37,9 @@ public class Client {
 
     private String password;
 
-    private String name;
-    private String surname;
-    private String patronymic;
-    private LocalDate birthdate;
+    @Column(name = "full_name")
+    private String fullName;
+    private Date birthdate;
 
     @Override
     public boolean equals(Object o) {
@@ -58,8 +58,7 @@ public class Client {
     public String toString() {
         return "Client{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
+                ", fullName='" + fullName + '\'' +
                 '}';
     }
 }

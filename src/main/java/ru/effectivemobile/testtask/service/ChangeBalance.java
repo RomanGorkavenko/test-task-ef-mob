@@ -15,7 +15,7 @@ public class ChangeBalance extends TimerTask {
 
     public static final Object monitor = new Object();
 
-    private static final int DELAY_OR_PERIOD = 10000;
+    private static final int DELAY_OR_PERIOD = 60000;
     private static final int NUMBER_TO_CONVERT = 100;
     private static final int SCALE = 2;
     private static final double PERCENT = 1.05;

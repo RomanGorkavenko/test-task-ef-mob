@@ -14,9 +14,7 @@ CREATE TABLE "client"(
                          "id" bigserial NOT NULL,
                          "account_id" BIGINT NOT NULL,
                          "username" VARCHAR(255) NOT NULL,
-                         "name" VARCHAR(255) NULL,
-                         "surname" VARCHAR(255) NULL,
-                         "patronymic" VARCHAR(255) NULL,
+                         "full_name" VARCHAR(255) NULL,
                          "birthdate" TIMESTAMP(0) WITHOUT TIME ZONE NULL,
                          "password" TEXT NOT NULL
 );

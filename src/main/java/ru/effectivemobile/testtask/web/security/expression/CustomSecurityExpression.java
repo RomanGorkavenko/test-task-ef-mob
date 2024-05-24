@@ -22,7 +22,7 @@ public class CustomSecurityExpression {
      * @return true - если имя пользователя совпадает с именем авторизованного пользователя иначе false.
      * @throws CustomAccessDeniedException - если пользователь не авторизован.
      */
-    public boolean canAccessUser(String username) {
+    public boolean canAccessClient(String username) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null) {
@@ -33,6 +33,20 @@ public class CustomSecurityExpression {
         String currentUsername = user.getUsername();
 
         return currentUsername.equals(username);
+
+    }
+
+    /**
+     * Проверка авторизации пользователя.
+     */
+    public boolean canAccessClient() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null) {
+            throw new CustomAccessDeniedException();
+        }
+
+        return authentication.isAuthenticated();
 
     }
 

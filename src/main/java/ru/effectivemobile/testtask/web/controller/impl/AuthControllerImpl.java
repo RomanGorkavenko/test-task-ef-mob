@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +38,6 @@ public class AuthControllerImpl implements AuthController {
     }
 
     @PostMapping("/register")
-//    @PreAuthorize("@customSecurityExpression.canAccessUser(#clientRequest.username)")
     public ResponseEntity<ClientResponse> register(
             @RequestBody @Valid ClientRequest clientRequest) {
 
@@ -50,6 +50,7 @@ public class AuthControllerImpl implements AuthController {
     }
 
     @PostMapping("/refresh")
+    @PreAuthorize("@customSecurityExpression.canAccessClient()")
     public JwtResponse refresh(@RequestBody String refreshToken) {
         return authService.refresh(refreshToken);
     }

@@ -1,20 +1,15 @@
 package ru.effectivemobile.testtask.web.dto;
 
 import lombok.Data;
-import ru.effectivemobile.testtask.model.Account;
 
-
-import java.time.LocalDate;
+import java.util.Date;
 
 @Data
 public class ClientResponse {
 
     private Long id;
-    private Account account;
     private String username;
-    private String name;
-    private String surname;
-    private String patronymic;
-    private LocalDate birthdate;
+    private String fullName;
+    private Date birthdate;
 
 }
