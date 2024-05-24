@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  postgres-user:
+    image: postgres:15.6-alpine3.19
+    container_name: db-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "55322:5432"

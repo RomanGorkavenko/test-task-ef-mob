@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: test-task
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST_LOCAL}:${POSTGRES_PORT}/${POSTGRES_DATABASE}?currentSchema=${POSTGRES_SCHEMA}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    change-log: classpath:liquibase/db.changelog.yaml
+    enabled: true
+    default-schema: testtask
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    access: 1 # hours
+    refresh: 30 # days
