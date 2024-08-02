@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.event.Level;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,13 +20,17 @@ import ru.effectivemobile.testtask.model.Client;
 import ru.effectivemobile.testtask.model.Email;
 import ru.effectivemobile.testtask.model.PhoneNumber;
 import ru.effectivemobile.testtask.repository.ClientRepository;
+import ru.effectivemobile.testtask.search.ClientSearchValues;
 import ru.effectivemobile.testtask.search.SearchClientForMoneyTransfer;
 import ru.effectivemobile.testtask.web.dto.ClientRequest;
 import ru.effectivemobile.testtask.web.dto.EmailUpdate;
 import ru.effectivemobile.testtask.web.dto.PhoneNumberUpdate;
 import ru.effectivemobile.testtask.web.security.JwtEntity;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Service
@@ -44,6 +49,7 @@ public class ClientService {
      * Создание клиента.
      * Использую библиотеку JavaFaker для генерации данных, так как при создании клиента пользователь их не вводит,
      * но они должны быть заполнены.
+     *
      * @param clientRequest запрос для создания клиента по условиям в ТЗ.
      * @return клиента.
      */
@@ -73,11 +79,34 @@ public class ClientService {
 
     /**
      * Поиск по параметрам с пагинацией и сортировкой.
+     *
      * @return результат по странично.
      */
     @Loggable(level = Level.INFO)
-    public Page<Client> findByParams(Date birthdate, String fullName,
-                                     String phoneNumber, String email, PageRequest paging) {
+    public Page<Client> findByParams(ClientSearchValues clientSearchValues) {
+
+        // исключить NullPointerException
+        Date birthdate = clientSearchValues.getBirthdate() != null ? clientSearchValues.getBirthdate() : null;
+        String fullName = clientSearchValues.getFullName() != null ? clientSearchValues.getFullName() : null;
+        String phoneNumber = clientSearchValues.getPhoneNumber() != null ? clientSearchValues.getPhoneNumber() : null;
+        String email = clientSearchValues.getEmail() != null ? clientSearchValues.getEmail() : null;
+
+        String sortColumn = clientSearchValues.getSortColumn() != null ? clientSearchValues.getSortColumn() : null;
+        String sortDirection = clientSearchValues.getSortDirection() != null ? clientSearchValues.getSortDirection() : null;
+
+        Integer pageNumber = clientSearchValues.getPageNumber();
+        Integer pageSize = clientSearchValues.getPageSize();
+
+        Sort.Direction direction =
+                sortDirection == null || sortDirection.trim().isEmpty() || sortDirection.trim().equals("ask")
+                        ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        // объект сортировки, который содержит столбец и направление
+        Sort sort = Sort.by(direction, sortColumn);
+
+        // объект постраничности
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, sort);
+
         PhoneNumber phoneNumberSearch = null;
         Email emailSearch = null;
 
@@ -89,7 +118,7 @@ public class ClientService {
             emailSearch = emailService.findByEmail(email);
         }
 
-        return clientRepository.findByParams(birthdate, fullName, phoneNumberSearch, emailSearch, paging);
+        return clientRepository.findByParams(birthdate, fullName, phoneNumberSearch, emailSearch, pageRequest);
 
     }
 
@@ -98,6 +127,7 @@ public class ClientService {
      * Со счета аутентифицированного пользователя, насчёт другого пользователя.
      * Добавлена проверка на отрицательный баланс.
      * Работа с базой потока безопасна.
+     *
      * @param searchClientForMoneyTransfer параметры поиска клиента для перевода.
      * @return остаток на балансе клиента после перевода денег.
      */
@@ -115,7 +145,7 @@ public class ClientService {
 
         Long clientBalance = client.getAccount().getBalance();
 
-        if(clientBalance >= amount) {
+        if (clientBalance >= amount) {
             clientBalance -= amount;
         } else {
             throw new BalancePositiveException("Ваш баланс не может быть отрицательным");
@@ -172,8 +202,8 @@ public class ClientService {
     @Loggable(level = Level.INFO)
     public PhoneNumber updatePhoneNumber(PhoneNumberUpdate phoneNumberUpdate) {
         return phoneNumberService.update(phoneNumberUpdate.getOldPhoneNumber(),
-                                phoneNumberUpdate.getNewPhoneNumber(),
-                                getUserId());
+                phoneNumberUpdate.getNewPhoneNumber(),
+                getUserId());
     }
 
     @Loggable(level = Level.INFO)
@@ -194,8 +224,8 @@ public class ClientService {
         PhoneNumber phoneNumberCreate;
 
         if (client.isPresent()) {
-           phoneNumberCreate = phoneNumberService.create(phoneNumber, client.get());
-        } else  {
+            phoneNumberCreate = phoneNumberService.create(phoneNumber, client.get());
+        } else {
             throw new CustomAccessDeniedException();
         }
 
@@ -231,7 +261,7 @@ public class ClientService {
 
         if (client.isPresent()) {
             emailCreate = emailService.create(email, client.get());
-        } else  {
+        } else {
             throw new CustomAccessDeniedException();
         }
 
@@ -240,6 +270,7 @@ public class ClientService {
 
     /**
      * Получение ID пользователя. Из авторизации.
+     *
      * @return ID пользователя.
      */
     @Loggable(level = Level.WARN)

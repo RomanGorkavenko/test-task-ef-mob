@@ -17,7 +17,6 @@ import ru.effectivemobile.testtask.service.ClientService;
 import ru.effectivemobile.testtask.service.props.JwtProperties;
 import ru.effectivemobile.testtask.web.dto.JwtResponse;
 
-
 import java.security.Key;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

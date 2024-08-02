@@ -21,6 +21,7 @@ public class AuthService {
 
     /**
      * Проверка авторизации пользователя.
+     *
      * @param loginRequest - запрос на авторизацию
      * @return {@link JwtResponse} dto - ответ на запрос
      */
@@ -40,6 +41,7 @@ public class AuthService {
 
     /**
      * Обновление токена.
+     *
      * @param refreshToken - токен для обновления.
      * @return {@link JwtResponse} dto - ответ на запрос
      */

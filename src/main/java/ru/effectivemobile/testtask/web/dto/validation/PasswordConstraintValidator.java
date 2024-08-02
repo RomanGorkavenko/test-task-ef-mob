@@ -17,8 +17,9 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
 
     /**
      * Метод содержит массив ограничений, которые мы хотим применить в нашем пароле.
+     *
      * @param password пароль который необходимо проверить.
-     * @param context контекст средства проверки ограничений.
+     * @param context  контекст средства проверки ограничений.
      * @return true or false.
      */
     @Override

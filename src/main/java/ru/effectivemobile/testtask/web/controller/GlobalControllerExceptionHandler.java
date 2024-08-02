@@ -7,7 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.effectivemobile.testtask.exception.BalancePositiveException;
 import ru.effectivemobile.testtask.exception.CustomAccessDeniedException;
 import ru.effectivemobile.testtask.exception.NumberOfPhoneNumbersOrEmailException;
@@ -65,6 +68,7 @@ public class GlobalControllerExceptionHandler {
     /**
      * Обрабатывает все ConstraintViolationException,
      * которые пробрасываются до уровня контроллера.
+     *
      * @return список ошибок.
      */
     @ResponseBody
@@ -87,6 +91,7 @@ public class GlobalControllerExceptionHandler {
     /**
      * Обрабатывает ошибки валидации для тел запросов
      * MethodArgumentNotValidExceptions
+     *
      * @return список ошибок.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)

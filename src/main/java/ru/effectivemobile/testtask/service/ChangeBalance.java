@@ -1,5 +1,6 @@
 package ru.effectivemobile.testtask.service;
 
+import lombok.extern.java.Log;
 import ru.effectivemobile.testtask.model.Account;
 import ru.effectivemobile.testtask.repository.AccountRepository;
 
@@ -11,6 +12,7 @@ import java.util.TimerTask;
 /**
  * Класс для работы с балансом.
  */
+@Log
 public class ChangeBalance extends TimerTask {
 
     public static final Object monitor = new Object();
@@ -36,6 +38,7 @@ public class ChangeBalance extends TimerTask {
 
     /**
      * Метод для округления баланса до двух знаков после запятой.
+     *
      * @return баланс с двумя знаками после запятой.
      */
     public static Double round(Double balance) {
@@ -46,6 +49,7 @@ public class ChangeBalance extends TimerTask {
 
     /**
      * Перевод баланса в копейки для хранения в базе данных.
+     *
      * @return баланс в копейках.
      */
     public static Long toLong(Double balance) {
@@ -55,6 +59,7 @@ public class ChangeBalance extends TimerTask {
 
     /**
      * Перевод баланса в рубли.
+     *
      * @return баланс в рублях.
      */
     public static Double toDouble(Long balance) {
@@ -63,21 +68,20 @@ public class ChangeBalance extends TimerTask {
 
     /**
      * Метод для изменения баланса на определенный процент через указанный промежуток времени.
-     * @param account аккаунт пользователя.
+     *
+     * @param account    аккаунт пользователя.
      * @param repository репозиторий для работы с аккаунтом.
      */
     public static void percentageIncrease(Double balance, Account account,
-                                            AccountRepository repository) {
+                                          AccountRepository repository) {
 
         Thread threadChangeBalance = new Thread(() -> {
             try {
                 Timer timer = new Timer();
-
                 ChangeBalance changeBalance = new ChangeBalance(balance, account, repository);
-
                 timer.schedule(changeBalance, DELAY_OR_PERIOD, DELAY_OR_PERIOD);
 
-                System.out.println("Start");
+//                System.out.println("Start");
 
                 synchronized (monitor) {
                     monitor.wait();
@@ -102,10 +106,10 @@ public class ChangeBalance extends TimerTask {
         balance = balance * PERCENT;
         account.setBalance(toLong(round(balance)));
 
-        System.out.println(balance);
+        log.info(String.format("%s", balance));
 
-        if (balance > initialBalance * MAXIMUM_PERCENTAGE){
-            synchronized (monitor){
+        if (balance > initialBalance * MAXIMUM_PERCENTAGE) {
+            synchronized (monitor) {
                 monitor.notify();
             }
         }

@@ -186,7 +186,7 @@ class ClientServiceTest {
 
         Mockito.when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
         Mockito.when(clientRepository.findByParamsForMoneyTransfer(
-                searchClientForMoneyTransfer.getUsername(), phoneNumber, null))
+                        searchClientForMoneyTransfer.getUsername(), phoneNumber, null))
                 .thenReturn(clientSearch);
 
         Double balance = clientService.moneyTransfer(searchClientForMoneyTransfer);

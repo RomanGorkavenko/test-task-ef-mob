@@ -29,6 +29,7 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
                               @Param("phoneNumber") PhoneNumber phoneNumber,
                               @Param("email") Email email,
                               Pageable pageable);
+
     @Query("""
             SELECT c FROM Client c WHERE
             (:username IS NULL OR :username='' OR c.username=:username) AND
